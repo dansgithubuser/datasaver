@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+if os.environ.get('DJANGOGO_ENV', None) == 'local':
+    INSTALLED_APPS.append('django_extensions')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
