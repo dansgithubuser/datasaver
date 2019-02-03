@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>TTC data saver</title>
+</head>
+
+<body>
+	track nearby TTC vehicles<br>
+	lat: <input type='text' id='lat' value=43.645262><br>
+	lon: <input type='text' id='lon' value=-79.382742><br>
+	<input type='button' onclick='update()' value='update'><br>
+
+	<canvas id="canvas" width="720" height="720">
+		<p>Your browser does not support the canvas element.</p>
+	</canvas><br>
+
+	<script>
+
+const ICON_SIZE = 4;
+const PIXELS_PER_DEGREE = 1e4;
+
+const gVehicles = {};
+var gCanvas;
+var gContext;
+var gLat;
+var gLon;
+
+function e(id) { return document.getElementById(id); }
+function v(id) { return e(id).value; }
+function last(array){ return array[array.length - 1]; }
+
+function vehicleIsNear(vehicle) {
+	return Math.abs(vehicle.lat - gLat) + Math.abs(vehicle.lon - gLon) < 1e-1;
+}
+
+function drawRect(x, y, w, h, r, g, b) {
+	gContext.fillStyle = `rgb(${r}, ${g}, ${b})`;
+	gContext.fillRect(x, y, w, h);
+}
+
+function drawIcon(x, y, r = 255, g = 0, b = 0) {
+	drawRect(
+		x - ICON_SIZE / 2, y - ICON_SIZE / 2,
+		ICON_SIZE, ICON_SIZE,
+		r, g, b
+	);
+}
+
+async function update() {
+	// get info
+	const response = await fetch('http://restbus.info/api/agencies/ttc/vehicles');
+	const vehicles = await response.json();
+	for (const i of vehicles) {
+		if (!(i.id in gVehicles)) gVehicles[i.id] = [];
+		gVehicles[i.id].push({
+			lat: parseFloat(i.lat),
+			lon: parseFloat(i.lon),
+			heading: parseFloat(i.heading),
+			routeId: i.routeId,
+			directionId: i.directionId,
+			predictable: i.predictable,
+			leadingVehicleId: i.leadingVehicleId,
+			secsSinceReport: parseFloat(i.secsSinceReport),
+		});
+	}
+	// render
+	gLat = parseFloat(v('lat'));
+	gLon = parseFloat(v('lon'));
+	gCanvas = e('canvas');
+	gContext = canvas.getContext('2d');
+	drawRect(0, 0, gCanvas.width, gCanvas.height, 0, 0, 0);// background
+	drawIcon(canvas.width / 2, canvas.height / 2, 0, 255);// self
+	for (const i of Object.values(gVehicles)) {
+		const vehicle = last(i);
+		if (vehicleIsNear(vehicle)) {
+			const x = (vehicle.lon - gLon) * PIXELS_PER_DEGREE + gCanvas.width / 2;
+			const y = -(vehicle.lat - gLat) * PIXELS_PER_DEGREE + gCanvas.height / 2;
+			drawIcon(x, y);
+		}
+	}
+}
+
+	</script>
+</body>
+
+</html>
