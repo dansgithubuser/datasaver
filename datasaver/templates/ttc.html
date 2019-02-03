@@ -49,8 +49,11 @@ function drawIcon(x, y, r = 255, g = 0, b = 0) {
 
 async function update() {
 	// get info
-	const response = await fetch('http://restbus.info/api/agencies/ttc/vehicles');
-	const vehicles = await response.json();
+	let url = window.location.href;
+	if (!url.endsWith('/')) url += '/';
+	url += 'vehicles';
+	const response = await fetch(url);
+	const vehicles = (await response.json()).vehicles;
 	for (const i of vehicles) {
 		if (!(i.id in gVehicles)) gVehicles[i.id] = [];
 		gVehicles[i.id].push({
