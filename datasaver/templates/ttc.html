@@ -57,13 +57,27 @@ function render() {
 	drawRect(0, 0, CANVAS.width, CANVAS.height, 0, 0, 0);// background
 	drawIcon(CANVAS.width / 2, CANVAS.height / 2, 0, 255);// self
 	for (const i in gVehicles) {
-		const vehicle = last(gVehicles[i]);
-		const { x, y } = vehicleGetPixelCoords(vehicle);
+		const vehiclePath = gVehicles[i];
 		const r = 255;
 		const g = 0;
 		const b = gSelected.includes(i) ? 255 : 0;
-		drawIcon(x, y, r, g, b);
-		CONTEXT.fillText(vehicle.routeId, x + ICON_SIZE, y);
+		let v;
+		let first = true;
+		CONTEXT.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+		CONTEXT.beginPath();
+		for (const j of vehiclePath) {
+			v = vehicleGetPixelCoords(j);
+			if (first) {
+				first = false;
+				CONTEXT.moveTo(v.x, v.y);
+			} else {
+				CONTEXT.lineTo(v.x, v.y);
+			}
+		}
+		CONTEXT.stroke();
+		drawIcon(v.x, v.y, r, g, b);
+		const vehicle = last(vehiclePath);
+		CONTEXT.fillText(vehicle.routeId, v.x + ICON_SIZE, v.y);
 	}
 }
 
