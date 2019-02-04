@@ -84,9 +84,10 @@ function render() {
 async function update() {
 	gLat = parseFloat(v('lat'));
 	gLon = parseFloat(v('lon'));
-	let url = window.location.href;
-	if (!url.endsWith('/')) url += '/';
-	url += `vehicles?lat=${gLat}&lon=${gLon}`;
+	let url = window.location.protocol + '//';
+	url += window.location.host;
+	url += window.location.pathname;
+	url += `/vehicles?lat=${gLat}&lon=${gLon}`;
 	const response = await fetch(url);
 	const vehicles = await response.json();
 	for (const i in vehicles) {
