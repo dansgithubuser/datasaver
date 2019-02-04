@@ -30,10 +30,6 @@ function e(id) { return document.getElementById(id); }
 function v(id) { return e(id).value; }
 function last(array){ return array[array.length - 1]; }
 
-function vehicleIsNear(vehicle) {
-	return Math.abs(vehicle.lat - gLat) + Math.abs(vehicle.lon - gLon) < 5e-2;
-}
-
 function drawRect(x, y, w, h, r, g, b) {
 	gContext.fillStyle = `rgb(${r}, ${g}, ${b})`;
 	gContext.fillRect(x, y, w, h);
@@ -49,39 +45,28 @@ function drawIcon(x, y, r = 255, g = 0, b = 0) {
 
 async function update() {
 	// get info
-	let url = window.location.href;
-	if (!url.endsWith('/')) url += '/';
-	url += 'vehicles';
-	const response = await fetch(url);
-	const vehicles = (await response.json()).vehicles;
-	for (const i of vehicles) {
-		if (!(i.id in gVehicles)) gVehicles[i.id] = [];
-		gVehicles[i.id].push({
-			lat: parseFloat(i.lat),
-			lon: parseFloat(i.lon),
-			heading: parseFloat(i.heading),
-			routeId: i.routeId,
-			directionId: i.directionId,
-			predictable: i.predictable,
-			leadingVehicleId: i.leadingVehicleId,
-			secsSinceReport: parseFloat(i.secsSinceReport),
-		});
-	}
-	// render
 	gLat = parseFloat(v('lat'));
 	gLon = parseFloat(v('lon'));
+	let url = window.location.href;
+	if (!url.endsWith('/')) url += '/';
+	url += `vehicles?lat=${gLat}&lon=${gLon}`;
+	const response = await fetch(url);
+	const vehicles = await response.json();
+	for (const i in vehicles) {
+		if (!(i in gVehicles)) gVehicles[i] = [];
+		gVehicles[i].push(vehicles[i]);
+	}
+	// render
 	gCanvas = e('canvas');
 	gContext = canvas.getContext('2d');
 	drawRect(0, 0, gCanvas.width, gCanvas.height, 0, 0, 0);// background
 	drawIcon(canvas.width / 2, canvas.height / 2, 0, 255);// self
 	for (const i of Object.values(gVehicles)) {
 		const vehicle = last(i);
-		if (vehicleIsNear(vehicle)) {
-			const x = (vehicle.lon - gLon) * PIXELS_PER_DEGREE + gCanvas.width / 2;
-			const y = -(vehicle.lat - gLat) * PIXELS_PER_DEGREE + gCanvas.height / 2;
-			drawIcon(x, y);
-			gContext.fillText(vehicle.routeId, x + ICON_SIZE, y);
-		}
+		const x = (vehicle.lon - gLon) * PIXELS_PER_DEGREE + gCanvas.width / 2;
+		const y = -(vehicle.lat - gLat) * PIXELS_PER_DEGREE + gCanvas.height / 2;
+		drawIcon(x, y);
+		gContext.fillText(vehicle.routeId, x + ICON_SIZE, y);
 	}
 }
 
