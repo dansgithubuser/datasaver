@@ -11,27 +11,37 @@
 	lon: <input type='text' id='lon' value=-79.382742><br>
 	<input type='button' onclick='update()' value='update'><br>
 
-	<canvas id="canvas" width="720" height="720">
+	<canvas id='canvas' width=720 height=720>
 		<p>Your browser does not support the canvas element.</p>
 	</canvas><br>
 
-	<script>
-const ICON_SIZE = 4;
-const PIXELS_PER_DEGREE = 2e4;
+	<div id='selected'></div>
 
-const gVehicles = {};
-var gCanvas;
-var gContext;
-var gLat;
-var gLon;
+	<script>
 
 function e(id) { return document.getElementById(id); }
 function v(id) { return e(id).value; }
 function last(array){ return array[array.length - 1]; }
 
+const ICON_SIZE = 4;
+const PIXELS_PER_DEGREE = 2e4;
+const CANVAS = e('canvas');
+const CONTEXT = CANVAS.getContext('2d');
+
+const gVehicles = {};
+var gSelected = [];
+var gLat, gLon;
+
+function vehicleGetPixelCoords(vehicle) {
+	return {
+		x: (vehicle.lon - gLon) * PIXELS_PER_DEGREE + CANVAS.width / 2,
+		y: -(vehicle.lat - gLat) * PIXELS_PER_DEGREE + CANVAS.height / 2,
+	};
+}
+
 function drawRect(x, y, w, h, r, g, b) {
-	gContext.fillStyle = `rgb(${r}, ${g}, ${b})`;
-	gContext.fillRect(x, y, w, h);
+	CONTEXT.fillStyle = `rgb(${r}, ${g}, ${b})`;
+	CONTEXT.fillRect(x, y, w, h);
 }
 
 function drawIcon(x, y, r = 255, g = 0, b = 0) {
@@ -42,8 +52,21 @@ function drawIcon(x, y, r = 255, g = 0, b = 0) {
 	);
 }
 
+function render() {
+	drawRect(0, 0, CANVAS.width, CANVAS.height, 0, 0, 0);// background
+	drawIcon(CANVAS.width / 2, CANVAS.height / 2, 0, 255);// self
+	for (const i in gVehicles) {
+		const vehicle = last(gVehicles[i]);
+		const { x, y } = vehicleGetPixelCoords(vehicle);
+		const r = 255;
+		const g = 0;
+		const b = gSelected.includes(i) ? 255 : 0;
+		drawIcon(x, y, r, g, b);
+		CONTEXT.fillText(vehicle.routeId, x + ICON_SIZE, y);
+	}
+}
+
 async function update() {
-	// get info
 	gLat = parseFloat(v('lat'));
 	gLon = parseFloat(v('lon'));
 	let url = window.location.href;
@@ -55,19 +78,48 @@ async function update() {
 		if (!(i in gVehicles)) gVehicles[i] = [];
 		gVehicles[i].push(vehicles[i]);
 	}
-	// render
-	gCanvas = e('canvas');
-	gContext = canvas.getContext('2d');
-	drawRect(0, 0, gCanvas.width, gCanvas.height, 0, 0, 0);// background
-	drawIcon(canvas.width / 2, canvas.height / 2, 0, 255);// self
-	for (const i of Object.values(gVehicles)) {
-		const vehicle = last(i);
-		const x = (vehicle.lon - gLon) * PIXELS_PER_DEGREE + gCanvas.width / 2;
-		const y = -(vehicle.lat - gLat) * PIXELS_PER_DEGREE + gCanvas.height / 2;
-		drawIcon(x, y);
-		gContext.fillText(vehicle.routeId, x + ICON_SIZE, y);
+	render();
+}
+
+function listSelected() {
+	const selected = e('selected');
+	while (selected.firstChild) selected.removeChild(selected.firstChild);
+	for (const i of gSelected) {
+		selected.appendChild(document.createTextNode(i));
+		const vehiclePath = gVehicles[i];
+		for (const j of vehiclePath) {
+			const ul = document.createElement('ul');
+			selected.appendChild(ul);
+			for (const k in j) {
+				const li = document.createElement('li');
+				li.innerText = `${k}: ${j[k]}`;
+				ul.appendChild(li);
+			}
+		}
 	}
 }
+
+function handleTap(x, y) {
+	const rect = CANVAS.getBoundingClientRect();
+	x -= rect.left;
+	y -= rect.top;
+	gSelected = [];
+	for (const i in gVehicles) {
+		const vehicle = last(gVehicles[i]);
+		const v = vehicleGetPixelCoords(vehicle);
+		if (Math.abs(v.x - x) + Math.abs(v.y - y) < 10) gSelected.push(i);
+	}
+	listSelected();
+	render();
+}
+
+CANVAS.addEventListener('mousedown', function(e) {
+	handleTap(e.x, e.y);
+});
+CANVAS.addEventListener('touchstart', function(e) {
+	for (const i of e.changedTouches)
+		handleTap(i.x, i.y);
+});
 
 params = new URLSearchParams(window.location.search);
 if (params.has('lat')) e('lat').value = params.get('lat');
