@@ -8,8 +8,9 @@
 <body>
 	track nearby TTC vehicles<br>
 	lat: <input type='text' id='lat' value=43.645262><br>
-	lon: <input type='text' id='lon' value=-79.382742><br>
-	<input type='button' onclick='update()' value='update'><br>
+	lon: <input type='text' id='lon' value=-79.382742><br><br>
+	<input type='button' onclick='update()' value='update'><br><br>
+	<input type='button' onclick='deselect()' value='deselect'><br>
 
 	<canvas id='canvas' width=720 height=720>
 		<p>Your browser does not support the canvas element.</p>
@@ -99,11 +100,16 @@ function listSelected() {
 	}
 }
 
+function deselect() {
+	gSelected = [];
+	render();
+	listSelected();
+}
+
 function handleTap(x, y) {
 	const rect = CANVAS.getBoundingClientRect();
 	x -= rect.left;
 	y -= rect.top;
-	gSelected = [];
 	for (const i in gVehicles) {
 		const vehicle = last(gVehicles[i]);
 		const v = vehicleGetPixelCoords(vehicle);
