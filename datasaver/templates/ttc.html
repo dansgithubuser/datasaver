@@ -16,7 +16,6 @@
 	</canvas><br>
 
 	<script>
-
 const ICON_SIZE = 4;
 const PIXELS_PER_DEGREE = 2e4;
 
@@ -69,6 +68,10 @@ async function update() {
 		gContext.fillText(vehicle.routeId, x + ICON_SIZE, y);
 	}
 }
+
+params = new URLSearchParams(window.location.search);
+if (params.has('lat')) e('lat').value = params.get('lat');
+if (params.has('lon')) e('lon').value = params.get('lon');
 
 	</script>
 </body>
