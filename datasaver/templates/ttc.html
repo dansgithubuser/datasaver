@@ -8,7 +8,10 @@
 <body>
 	track nearby TTC vehicles<br>
 	lat: <input type='text' id='lat' value=43.645262><br>
-	lon: <input type='text' id='lon' value=-79.382742><br><br>
+	lon: <input type='text' id='lon' value=-79.382742><br>
+	unparsed: <input type='text' id='unparsed'><input type='button' onclick='parse()' value='parse'><br>
+	<input type='button' onclick='toUrl()' value='to URL'><br>
+	<br>
 	<input type='button' onclick='update()' value='update'><br><br>
 	<input type='button' onclick='deselect()' value='deselect'><br>
 
@@ -32,6 +35,26 @@ const CONTEXT = CANVAS.getContext('2d');
 const gVehicles = {};
 var gSelected = [];
 var gLat, gLon;
+
+function urlWithoutParams() {
+	return (
+		window.location.protocol + '//'
+		+
+		window.location.host
+		+
+		window.location.pathname
+	);
+}
+
+function parse() {
+	const unparsed = v('unparsed');
+	[e('lat').value, e('lon').value] = unparsed.split(',');
+}
+
+function toUrl() {
+	const url = urlWithoutParams() + `?lat=${v('lat')}&lon=${v('lon')}`;
+	window.location.replace(url);
+}
 
 function vehicleGetPixelCoords(vehicle) {
 	return {
@@ -84,10 +107,7 @@ function render() {
 async function update() {
 	gLat = parseFloat(v('lat'));
 	gLon = parseFloat(v('lon'));
-	let url = window.location.protocol + '//';
-	url += window.location.host;
-	url += window.location.pathname;
-	url += `/vehicles?lat=${gLat}&lon=${gLon}`;
+	const url = urlWithoutParams() + `/vehicles?lat=${gLat}&lon=${gLon}`;
 	const response = await fetch(url);
 	const vehicles = await response.json();
 	for (const i in vehicles) {
