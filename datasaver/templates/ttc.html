@@ -12,7 +12,7 @@
 	unparsed: <input type='text' id='unparsed'><input type='button' onclick='parse()' value='parse'><br>
 	<input type='button' onclick='toUrl()' value='to URL'><br>
 	<br>
-	<input type='button' onclick='update()' value='update'><br><br>
+	<input type='button' onclick='update()' value='update' id='update'><br><br>
 	<input type='button' onclick='deselect()' value='deselect'><br>
 
 	<canvas id='canvas' width=720 height=720>
@@ -106,6 +106,7 @@ function render() {
 }
 
 async function update() {
+	e('update').disabled = true;
 	gLat = parseFloat(v('lat'));
 	gLon = parseFloat(v('lon'));
 	const url = urlWithoutParams() + `/vehicles?lat=${gLat}&lon=${gLon}`;
@@ -116,6 +117,7 @@ async function update() {
 		gVehicles[i].push(vehicles[i]);
 	}
 	render();
+	e('update').disabled = false;
 }
 
 function listSelected() {
