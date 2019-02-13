@@ -57,9 +57,10 @@ function toUrl() {
 }
 
 function vehicleGetPixelCoords(vehicle) {
+	const lonPerLat = Math.cos(gLat / 360 * 2 * Math.PI);
 	return {
-		x: (vehicle.lon - gLon) * PIXELS_PER_DEGREE + CANVAS.width / 2,
-		y: -(vehicle.lat - gLat) * PIXELS_PER_DEGREE + CANVAS.height / 2,
+		x:  (vehicle.lon - gLon) * PIXELS_PER_DEGREE * lonPerLat + CANVAS.width  / 2,
+		y: -(vehicle.lat - gLat) * PIXELS_PER_DEGREE             + CANVAS.height / 2,
 	};
 }
 
