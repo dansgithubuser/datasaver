@@ -26,7 +26,7 @@ SECRET_KEY = 'x0+2-*q2aqc2%o&(1wvq_rruc@7nxp)@&b61y$$mi&ad#qkfwe'
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'https://pacific-hamlet-93435.herokuapp.com/',
+    'https://dans-datasaver.herokuapp.com',
 ]
 
 

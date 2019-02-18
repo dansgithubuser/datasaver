@@ -13,5 +13,5 @@ djangogo.main(args,
 	app='datasaver',
 	database='datasaver_database',
 	user='datasaver_user',
-	heroku_url='https://pacific-hamlet-93435.herokuapp.com/',
+	heroku_url='https://dans-datasaver.herokuapp.com/',
 )
