@@ -151,7 +151,11 @@ function handleTap(x, y) {
 	for (const i in gVehicles) {
 		const vehicle = last(gVehicles[i]);
 		const v = vehicleGetPixelCoords(vehicle);
-		if (Math.abs(v.x - x) + Math.abs(v.y - y) < 10) gSelected.push(i);
+		if (Math.abs(v.x - x) + Math.abs(v.y - y) < 10) {
+			const index = gSelected.indexOf(i);
+			if (index < 0) gSelected.push(i);
+			else gSelected.splice(index, 1);
+		}
 	}
 	listSelected();
 	render();
