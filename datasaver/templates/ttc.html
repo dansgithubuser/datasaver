@@ -101,7 +101,7 @@ function render() {
 		CONTEXT.stroke();
 		drawIcon(v.x, v.y, r, g, b);
 		const vehicle = last(vehiclePath);
-		CONTEXT.fillText(vehicle.routeId, v.x + ICON_SIZE, v.y);
+		CONTEXT.fillText(vehicle.route, v.x + ICON_SIZE, v.y);
 	}
 }
 

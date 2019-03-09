@@ -3,28 +3,35 @@ from django.template import loader
 
 import urllib.request
 
-import json
+import math
+import xml.etree.cElementTree
 
 def ttc(request):
     return HttpResponse(loader.get_template('ttc.html').render({
     }, request))
 
 def ttc_vehicles(request):
-    lat = float(request.GET['lat'])
-    lon = float(request.GET['lon'])
-    r = urllib.request.urlopen('http://restbus.info/api/agencies/ttc/vehicles')
-    j = json.loads(r.read())
+    request_lat = float(request.GET['lat'])
+    request_lon = float(request.GET['lon'])
+    response = urllib.request.urlopen('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=ttc&t=0')
+    tree = xml.etree.cElementTree.XML(response.read())
     result = {}
-    for i in j:
-        if abs(i['lat'] - lat) + abs(i['lon'] - lon) > 5e-2: continue
-        result[i['id']] = dict(
-            lat=float(i['lat']),
-            lon=float(i['lon']),
-            heading=float(i['heading']),
-            routeId=i['routeId'],
-            directionId=i['directionId'],
-            predictable=i['predictable'],
-            leadingVehicleId=i['leadingVehicleId'],
-            secsSinceReport=float(i['secsSinceReport']),
+    for i in tree.getchildren():
+        if i.tag != 'vehicle': continue
+        vehicle = i.attrib
+        vehicle_lat = float(vehicle['lat'])
+        vehicle_lon = float(vehicle['lon'])
+        if abs(vehicle_lat - request_lat) + abs(vehicle_lon - request_lon) > 5e-2: continue
+        speed=vehicle.get('speedKmHr')
+        if speed is not None: speed=float(speed)
+        result[vehicle['id']] = dict(
+            route=vehicle['routeTag'],
+            direction=vehicle['dirTag'],
+            lat=vehicle_lat,
+            lon=vehicle_lon,
+            reportAge=float(vehicle['secsSinceReport']),
+            predictable=vehicle['predictable'],
+            heading=float(vehicle['heading']),
+            speed=speed,
         )
     return JsonResponse(result)
