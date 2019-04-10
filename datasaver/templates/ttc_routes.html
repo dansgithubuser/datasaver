@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>TTC data saver</title>
+</head>
+
+<body>
+	see the shape and stops of a route<br>
+	route: <select id='routeInput' oninput='get()'></select><br>
+	direction: <select id='directionInput' oninput='render()'></select><br>
+	<input type='button' value='reset' onclick='reset()'><br>
+	rotate stop titles: <input type='checkbox' id='rotateInput' oninput='render()'><br>
+
+	<canvas id='canvas' width=720 height=720>
+		<p>Your browser does not support the canvas element.</p>
+	</canvas><br>
+
+	<script>
+
+function e(id) { return document.getElementById(id); }
+function v(id) { return e(id).value; }
+
+const ICON_SIZE = 4;
+const CANVAS = e('canvas');
+const CONTEXT = CANVAS.getContext('2d');
+const ROUTES = {
+	{% for k, v in routes.items %}
+		{{ k }}: '{{ v }}',
+	{% endfor %}
+};
+
+var gStops;
+var gDirections;
+var gLat, gLon, gLatMin, gLatMax, gLonMin, gLonMax;
+var gPixelsPerDegree;
+
+/*
+easiest way to conceive:
+distance of 1 degree of longitude / distance of 1 degree of latitude
+
+equivalent to:
+latitude per distance / longitude per distance
+
+if we cancel out distance
+latitude / longitude
+*/
+function aspect() {
+	return Math.cos(gLat / 360 * 2 * Math.PI);
+}
+
+function getPixelCoords(lat, lon) {
+	return {
+		x:  (lon - gLon) * gPixelsPerDegree * aspect() + CANVAS.width  / 2,
+		y: -(lat - gLat) * gPixelsPerDegree            + CANVAS.height / 2,
+	};
+}
+
+function getLatLon(x, y) {
+	return {
+		lat: -(y - CANVAS.height / 2) / gPixelsPerDegree            + gLat,
+		lon:  (x - CANVAS.width  / 2) / gPixelsPerDegree / aspect() + gLon,
+	};
+}
+
+function drawRect(x, y, w, h, r, g, b) {
+	CONTEXT.fillStyle = `rgb(${r}, ${g}, ${b})`;
+	CONTEXT.fillRect(x, y, w, h);
+}
+
+function drawIcon(x, y, r = 255, g = 0, b = 0) {
+	drawRect(
+		x - ICON_SIZE / 2, y - ICON_SIZE / 2,
+		ICON_SIZE, ICON_SIZE,
+		r, g, b
+	);
+}
+
+for (i in ROUTES) {
+	const opt = document.createElement('option');
+	opt.value = i;
+	opt.textContent = ROUTES[i];
+	e('routeInput').appendChild(opt);
+}
+
+async function get() {
+	const response = await fetch(`/ttc/routes/get?tag=${v('routeInput')}`);
+	const json = await response.json();
+	gStops = json.stops;
+	gDirections = json.directions;
+	gLatMin = parseFloat(json.latMin);
+	gLatMax = parseFloat(json.latMax);
+	gLonMin = parseFloat(json.lonMin);
+	gLonMax = parseFloat(json.lonMax);
+	const d = e('directionInput');
+	while (d.hasChildNodes()) d.removeChild(d.lastChild);
+	for (i in gDirections) {
+		const opt = document.createElement('option');
+		opt.value = i;
+		opt.textContent = gDirections[i].title;
+		d.appendChild(opt);
+	}
+	reset();
+}
+
+function reset() {
+	gLat = (gLatMin + gLatMax) / 2;
+	gLon = (gLonMin + gLonMax) / 2;
+	gPixelsPerDegree = 0.9 * Math.min(
+		CANVAS.height /  (gLatMax - gLatMin),
+		CANVAS.width  / ((gLonMax - gLonMin) * aspect()),
+	);
+	render();
+}
+
+function render() {
+	drawRect(0, 0, CANVAS.width, CANVAS.height, 0, 0, 0);// background
+	CONTEXT.strokeStyle = `rgb(255, 0, 0)`;
+	CONTEXT.beginPath();
+	for (const i of gDirections[v('directionInput')].stops) {
+		const stop = gStops[i];
+		p = getPixelCoords(parseFloat(stop.lat), parseFloat(stop.lon));
+		CONTEXT.lineTo(p.x, p.y);
+		drawIcon(p.x, p.y, 255, 0, 0);
+		CONTEXT.save();
+		CONTEXT.translate(p.x, p.y);
+		if (e('rotateInput').checked) CONTEXT.rotate(-Math.PI / 2);
+		CONTEXT.fillText(stop.title, ICON_SIZE, 0);
+		CONTEXT.restore();
+	}
+	CONTEXT.stroke();
+}
+
+function handleTap(x, y) {
+	const rect = CANVAS.getBoundingClientRect();
+	x -= rect.left;
+	y -= rect.top;
+	const latLon = getLatLon(x, y);
+	gLat = latLon.lat;
+	gLon = latLon.lon;
+	gPixelsPerDegree *= 1.5;
+	render();
+}
+
+CANVAS.addEventListener('mousedown', function(e) {
+	handleTap(e.x, e.y);
+});
+CANVAS.addEventListener('touchstart', function(e) {
+	for (const i of e.changedTouches)
+		handleTap(i.x, i.y);
+});
+
+	</script>
+</body>
+
+</html>
