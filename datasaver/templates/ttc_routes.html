@@ -16,6 +16,8 @@
 		<p>Your browser does not support the canvas element.</p>
 	</canvas><br>
 
+	<p id='message'></p>
+
 	<script>
 
 function e(id) { return document.getElementById(id); }
@@ -142,11 +144,12 @@ function handleTap(x, y) {
 	render();
 }
 
-CANVAS.addEventListener('mousedown', function(e) {
-	handleTap(e.x, e.y);
+CANVAS.addEventListener('mousedown', function(event) {
+	handleTap(event.x, event.y);
 });
-CANVAS.addEventListener('touchstart', function(e) {
-	for (const i of e.changedTouches)
+CANVAS.addEventListener('touchstart', function(event) {
+	if (event.x === undefined) return;
+	for (const i of event.changedTouches)
 		handleTap(i.x, i.y);
 });
 
