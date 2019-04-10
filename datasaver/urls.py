@@ -1,7 +1,11 @@
-from django.urls import path
 from . import views
 
+from django.urls import path
+from django.views.generic import TemplateView
+
+ttc_vehicles_view = TemplateView.as_view(template_name='ttc_vehicles.html')
+
 urlpatterns=[
-    path('ttc', views.ttc),
-    path('ttc/vehicles', views.ttc_vehicles),
+    path('ttc/vehicles', ttc_vehicles_view),
+    path('ttc/vehicles/get', views.ttc_vehicles_get),
 ]

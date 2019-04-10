@@ -16,7 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from datasaver import urls
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('datasaver/', include('datasaver.urls')),
+    path('datasaver/ttc', urls.ttc_vehicles_view),#backward compatibility
+    path('', include('datasaver.urls')),
 ]

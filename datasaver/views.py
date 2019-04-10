@@ -1,16 +1,11 @@
-from django.http import HttpResponse, JsonResponse
-from django.template import loader
+from django.http import JsonResponse
 
 import urllib.request
 
 import math
 import xml.etree.cElementTree
 
-def ttc(request):
-    return HttpResponse(loader.get_template('ttc.html').render({
-    }, request))
-
-def ttc_vehicles(request):
+def ttc_vehicles_get(request):
     request_lat = float(request.GET['lat'])
     request_lon = float(request.GET['lon'])
     response = urllib.request.urlopen('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=ttc&t=0')

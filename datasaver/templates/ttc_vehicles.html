@@ -36,24 +36,13 @@ const gVehicles = {};
 var gSelected = [];
 var gLat, gLon;
 
-function urlWithoutParams() {
-	return (
-		window.location.protocol + '//'
-		+
-		window.location.host
-		+
-		window.location.pathname
-	);
-}
-
 function parse() {
 	const unparsed = v('unparsed');
 	[e('lat').value, e('lon').value] = unparsed.split(',');
 }
 
 function toUrl() {
-	const url = urlWithoutParams() + `?lat=${v('lat')}&lon=${v('lon')}`;
-	window.location.replace(url);
+	window.location.replace(`${window.location.pathname}?lat=${v('lat')}&lon=${v('lon')}`);
 }
 
 function vehicleGetPixelCoords(vehicle) {
@@ -109,7 +98,7 @@ async function update() {
 	e('update').disabled = true;
 	gLat = parseFloat(v('lat'));
 	gLon = parseFloat(v('lon'));
-	const url = urlWithoutParams() + `/vehicles?lat=${gLat}&lon=${gLon}`;
+	const url = `/ttc/vehicles/get?lat=${gLat}&lon=${gLon}`;
 	const response = await fetch(url);
 	const vehicles = await response.json();
 	for (const i in vehicles) {
