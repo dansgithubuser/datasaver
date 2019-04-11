@@ -20,6 +20,7 @@
 	</canvas><br>
 
 	<div id='selected'></div>
+	<p id='message'/>
 
 	<script>
 
@@ -100,12 +101,21 @@ async function update() {
 	gLon = parseFloat(v('lon'));
 	const url = `/ttc/vehicles/get?lat=${gLat}&lon=${gLon}`;
 	const response = await fetch(url);
-	const vehicles = await response.json();
-	for (const i in vehicles) {
-		if (!(i in gVehicles)) gVehicles[i] = [];
-		gVehicles[i].push(vehicles[i]);
+	if (response.status != 200) {
+		var error = '';
+		if (response.headers.get('content-type').includes('application/json')) {
+			const json = await response.json();
+			error = json.error;
+		}
+		e('message').innerHTML = `${response.status}: ${response.statusText}. ${error}`;
+	} else {
+		const vehicles = await response.json();
+		for (const i in vehicles) {
+			if (!(i in gVehicles)) gVehicles[i] = [];
+			gVehicles[i].push(vehicles[i]);
+		}
+		render();
 	}
-	render();
 	e('update').disabled = false;
 }
 

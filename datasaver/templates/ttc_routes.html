@@ -87,6 +87,10 @@ for (i in ROUTES) {
 
 async function get() {
 	const response = await fetch(`/ttc/routes/get?tag=${v('routeInput')}`);
+	if (response.status != 200) {
+		e('message').innerHTML = `${response.status}: ${response.statusText}.`;
+		return;
+	}
 	const json = await response.json();
 	gStops = json.stops;
 	gDirections = json.directions;

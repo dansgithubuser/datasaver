@@ -11,6 +11,11 @@ def ttc_vehicles_get(request):
     request_lon = float(request.GET['lon'])
     response = urllib.request.urlopen('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=ttc&t=0')
     tree = xml.etree.cElementTree.XML(response.read())
+    error = [i for i in tree.getchildren() if i.tag == 'Error']
+    if error:
+        error = [i.text.strip() for i in error]
+        if len(error) == 1: error = error[0]
+        return JsonResponse({'error': error}, status=502)
     result = {}
     for i in tree.getchildren():
         if i.tag != 'vehicle': continue
