@@ -1,24 +1,26 @@
+from . import helpers
+
 from django.http import JsonResponse
 from django.shortcuts import render
 
 import urllib.request
 
 import math
-import xml.etree.cElementTree
 
 def ttc_vehicles_get(request):
     request_lat = float(request.GET['lat'])
     request_lon = float(request.GET['lon'])
-    response = urllib.request.urlopen('http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=ttc&t=0')
-    tree = xml.etree.cElementTree.XML(response.read())
-    error = [i for i in tree.getchildren() if i.tag == 'Error']
-    if error:
-        error = [i.text.strip() for i in error]
+    try: vehicles = helpers.get_xml_children(
+        helpers.url_nextbus_vehicle_locations,
+        lambda xml: [i for i in xml.getchildren() if i.tag == 'Error'],
+        lambda i: i.tag == 'vehicle',
+    )
+    except helpers.Error as e:
+        error = [i.text.strip() for i in e.capture]
         if len(error) == 1: error = error[0]
         return JsonResponse({'error': error}, status=502)
     result = {}
-    for i in tree.getchildren():
-        if i.tag != 'vehicle': continue
+    for i in vehicles:
         vehicle = i.attrib
         vehicle_lat = float(vehicle['lat'])
         vehicle_lon = float(vehicle['lon'])
@@ -38,16 +40,13 @@ def ttc_vehicles_get(request):
     return JsonResponse(result)
 
 def ttc_routes(request):
-    response = urllib.request.urlopen('http://webservices.nextbus.com/service/publicXMLFeed?command=routeList&a=ttc')
-    tree = xml.etree.cElementTree.XML(response.read())
-    routes = {i.attrib['tag']: i.attrib['title'] for i in tree.getchildren()}
+    xml = helpers.get_xml_children(helpers.url_nextbus_route_list)
+    routes = {i.attrib['tag']: i.attrib['title'] for i in xml}
     return render(request, 'ttc_routes.html', {'routes': routes})
 
 def ttc_routes_get(request):
     tag = request.GET['tag']
-    response = urllib.request.urlopen('http://webservices.nextbus.com/service/publicXMLFeed?command=routeConfig&a=ttc&r={}'.format(tag))
-    tree = xml.etree.cElementTree.XML(response.read())
-    route = tree.getchildren()[0]
+    route = helpers.get_xml_children(helpers.url_nextbus_route_config.format(tag))[0]
     stops = [i for i in route.getchildren() if i.tag == 'stop']
     directions = [i for i in route.getchildren() if i.tag == 'direction']
     return JsonResponse({
