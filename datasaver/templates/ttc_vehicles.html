@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
 
-<head>
-	<title>TTC data saver</title>
-</head>
-
-<body>
+{% block content %}
 	track nearby TTC vehicles<br>
 	lat: <input type='text' id='lat' value=43.645262><br>
 	lon: <input type='text' id='lon' value=-79.382742><br>
@@ -24,14 +19,12 @@
 
 	<script>
 
-function e(id) { return document.getElementById(id); }
-function v(id) { return e(id).value; }
+{% include 'boilerplate_canvas.js' %}
+{% include 'lat_lon_pixel.js' %}
+
 function last(array){ return array[array.length - 1]; }
 
-const ICON_SIZE = 4;
 const PIXELS_PER_DEGREE = 2e4;
-const CANVAS = e('canvas');
-const CONTEXT = CANVAS.getContext('2d');
 
 const gVehicles = {};
 var gSelected = [];
@@ -44,27 +37,6 @@ function parse() {
 
 function toUrl() {
 	window.location.replace(`${window.location.pathname}?lat=${v('lat')}&lon=${v('lon')}`);
-}
-
-function vehicleGetPixelCoords(vehicle) {
-	const lonPerLat = Math.cos(gLat / 360 * 2 * Math.PI);
-	return {
-		x:  (vehicle.lon - gLon) * PIXELS_PER_DEGREE * lonPerLat + CANVAS.width  / 2,
-		y: -(vehicle.lat - gLat) * PIXELS_PER_DEGREE             + CANVAS.height / 2,
-	};
-}
-
-function drawRect(x, y, w, h, r, g, b) {
-	CONTEXT.fillStyle = `rgb(${r}, ${g}, ${b})`;
-	CONTEXT.fillRect(x, y, w, h);
-}
-
-function drawIcon(x, y, r = 255, g = 0, b = 0) {
-	drawRect(
-		x - ICON_SIZE / 2, y - ICON_SIZE / 2,
-		ICON_SIZE, ICON_SIZE,
-		r, g, b
-	);
 }
 
 function render() {
@@ -80,7 +52,7 @@ function render() {
 		CONTEXT.strokeStyle = `rgb(${r}, ${g}, ${b})`;
 		CONTEXT.beginPath();
 		for (const j of vehiclePath) {
-			v = vehicleGetPixelCoords(j);
+			v = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
 			if (first) {
 				first = false;
 				CONTEXT.moveTo(v.x, v.y);
@@ -149,7 +121,7 @@ function handleTap(x, y) {
 	y -= rect.top;
 	for (const i in gVehicles) {
 		const vehicle = last(gVehicles[i]);
-		const v = vehicleGetPixelCoords(vehicle);
+		const v = getPixelCoords(vehicle.lat, vehicle.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
 		if (Math.abs(v.x - x) + Math.abs(v.y - y) < 10) {
 			const index = gSelected.indexOf(i);
 			if (index < 0) gSelected.push(i);
@@ -166,13 +138,11 @@ CANVAS.addEventListener('mousedown', function(e) {
 CANVAS.addEventListener('touchstart', function(e) {
 	for (const i of e.changedTouches)
 		handleTap(i.x, i.y);
-});
+}, {passive: true});
 
 params = new URLSearchParams(window.location.search);
 if (params.has('lat')) e('lat').value = params.get('lat');
 if (params.has('lon')) e('lon').value = params.get('lon');
 
 	</script>
-</body>
-
-</html>
+{% endblock %}
