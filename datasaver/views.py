@@ -29,7 +29,7 @@ def ttc_vehicles_get(request):
         if speed is not None: speed=float(speed)
         result[vehicle['id']] = dict(
             route=vehicle['routeTag'],
-            direction=vehicle['dirTag'],
+            direction=vehicle.get('dirTag', '???'),
             lat=vehicle_lat,
             lon=vehicle_lon,
             reportAge=float(vehicle['secsSinceReport']),
@@ -63,4 +63,9 @@ def ttc_routes_get(request):
             'title': i.attrib['title'],
             'stops': [j.attrib['tag'] for j in i.getchildren()],
         } for i in directions},
+    })
+
+def ttc_performance_get(request):
+    helpers.ttc_routes_maintain()
+    return JsonResponse({
     })

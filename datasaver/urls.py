@@ -10,4 +10,6 @@ urlpatterns = [
     path('ttc/vehicles/get', views.ttc_vehicles_get),
     path('ttc/routes', views.ttc_routes),
     path('ttc/routes/get', views.ttc_routes_get),
+    path('ttc/performance', TemplateView.as_view(template_name='ttc_performance.html')),
+    path('ttc/performance/get', views.ttc_performance_get),
 ]

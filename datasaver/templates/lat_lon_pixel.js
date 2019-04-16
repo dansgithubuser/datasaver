@@ -21,7 +21,7 @@ function getPixelCoords(lat, lon, latO, lonO, pixelsPerDegree, canvas) {
 
 function getLatLon(x, y, latO, lonO, pixelsPerDegree, canvas) {
 	return {
-		lat: -(y - canvas.height / 2) / pixelsPerDegree                + latO
-		lon:  (x - canvas.width  / 2) / pixelsPerDegree / aspect(latO) + lonO
+		lat: -(y - canvas.height / 2) / pixelsPerDegree                + latO,
+		lon:  (x - canvas.width  / 2) / pixelsPerDegree / aspect(latO) + lonO,
 	};
 }
