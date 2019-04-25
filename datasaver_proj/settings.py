@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -145,3 +148,8 @@ try:
     import django_heroku
     django_heroku.settings(locals())
 except Exception as e: print(e)
+
+sentry_sdk.init(
+    dsn="https://9d4ac41410834c049eb8214c48025dde@sentry.io/1446158",
+    integrations=[DjangoIntegration()],
+)

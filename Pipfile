@@ -9,6 +9,7 @@ verify_ssl = true
 django = "*"
 gunicorn = "*"
 django-heroku = "*"
+sentry-sdk = "==0.7.11"
 
 
 [requires]
