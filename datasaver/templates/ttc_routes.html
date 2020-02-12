@@ -11,6 +11,10 @@
 		<p>Your browser does not support the canvas element.</p>
 	</canvas><br>
 
+	<div>
+		<input id='highlighted' type='text' placeholder='stop tags'>
+		<input type='button' value='highlight' onclick='highlight()'>
+	</div>
 	<p id='message'></p>
 
 	<script>
@@ -78,7 +82,7 @@ function render() {
 		const stop = gStops[i];
 		p = getPixelCoords(parseFloat(stop.lat), parseFloat(stop.lon), gLat, gLon, gPixelsPerDegree, CANVAS);
 		CONTEXT.lineTo(p.x, p.y);
-		drawIcon(p.x, p.y, 255, 0, 0);
+		drawIcon(p.x, p.y, 255, 0, (v('highlighted').split(' ').includes(i.toString())) ? 255 : 0);
 		CONTEXT.save();
 		CONTEXT.translate(p.x, p.y);
 		if (e('rotateInput').checked) CONTEXT.rotate(-Math.PI / 2);
@@ -96,6 +100,10 @@ function handleTap(x, y) {
 	gLat = latLon.lat;
 	gLon = latLon.lon;
 	gPixelsPerDegree *= 1.5;
+	render();
+}
+
+function highlight() {
 	render();
 }
 
