@@ -10,7 +10,7 @@ import pytz
 import types
 from xml.etree.cElementTree import XML
 
-url_nextbus = 'http://webservices.nextbus.com/service/publicXMLFeed?'
+url_nextbus = 'https://retro.umoiq.com/service/publicXMLFeed?'
 url_nextbus_vehicle_locations = url_nextbus + 'command=vehicleLocations&a=ttc&t=0'
 url_nextbus_route_list = url_nextbus + 'command=routeList&a=ttc'
 url_nextbus_route_config = url_nextbus + 'command=routeConfig&a=ttc&r={}&terse'
