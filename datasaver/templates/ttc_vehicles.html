@@ -5,6 +5,7 @@
 	lat: <input type='text' id='lat' value=43.645262><br>
 	lon: <input type='text' id='lon' value=-79.382742><br>
 	unparsed: <input type='text' id='unparsed'><input type='button' onclick='parse()' value='parse'><br>
+	<input type='button' onclick='getLocation()' value='get location'><br>
 	<input type='button' onclick='toUrl()' value='to URL'><br>
 	<br>
 	<input type='button' onclick='update()' value='update' id='update'><br><br>
@@ -37,6 +38,16 @@ function parse() {
 
 function toUrl() {
 	window.location.replace(`${window.location.pathname}?lat=${v('lat')}&lon=${v('lon')}`);
+}
+
+function getLocation() {
+	navigator.geolocation.getCurrentPosition(
+		(position) => {
+			const { latitude, longitude } = position.coords;
+			e('lat').value = latitude;
+			e('lon').value = longitude;
+		},
+	);
 }
 
 function render() {
