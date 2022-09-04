@@ -23,13 +23,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'x0+2-*q2aqc2%o&(1wvq_rruc@7nxp)@&b61y$$mi&ad#qkfwe'
+if os.environ.get('DJANGOGO_ENV') == 'local':
+    SECRET_KEY = 'x0+2-*q2aqc2%o&(1wvq_rruc@7nxp)@&b61y$$mi&ad#qkfwe'
+else:
+    SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'https://dans-datasaver.herokuapp.com',
+    'https://datasaver.dansonlinepresence.com',
 ]
 
 
@@ -45,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-if os.environ.get('DJANGOGO_ENV', None) == 'local':
+if os.environ.get('DJANGOGO_ENV') == 'local':
     INSTALLED_APPS.append('django_extensions')
 
 MIDDLEWARE = [
@@ -143,11 +146,6 @@ CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
-
-try:
-    import django_heroku
-    django_heroku.settings(locals())
-except Exception as e: print(e)
 
 sentry_sdk.init(
     dsn="https://9d4ac41410834c049eb8214c48025dde@sentry.io/1446158",
