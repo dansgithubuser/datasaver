@@ -1,4 +1,3 @@
-https://dans-datasaver.herokuapp.com/datasaver/ttc
+https://datasaver.dansonlinepresence.com
 
-# todo
-nothing right now...
+low-bandwidth solutions to use on a low-bandwidth mobile data plan
