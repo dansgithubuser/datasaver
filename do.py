@@ -106,6 +106,7 @@ if args.docker_create_env_file:
         f.write(f'DOMAIN={domain}\n')
 
 if args.docker_run:
+    invoke('docker rm -f datasaver')
     invoke(
         'docker', 'run',
         '-d',
