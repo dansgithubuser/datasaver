@@ -10,9 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -147,7 +144,16 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-sentry_sdk.init(
-    dsn="https://9d4ac41410834c049eb8214c48025dde@sentry.io/1446158",
-    integrations=[DjangoIntegration()],
-)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
