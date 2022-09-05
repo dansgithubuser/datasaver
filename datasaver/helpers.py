@@ -2,13 +2,14 @@ from . import models
 
 from django.db import transaction
 
+import defusedxml.ElementTree as ET
+
 from urllib.request import urlopen
 
 import collections
 import datetime
 import pytz
 import types
-from xml.etree.cElementTree import XML
 
 url_nextbus = 'https://retro.umoiq.com/service/publicXMLFeed?'
 url_nextbus_vehicle_locations = url_nextbus + 'command=vehicleLocations&a=ttc&t=0'
@@ -55,7 +56,7 @@ class Bulker:
 def now_utc(): return datetime.datetime.now(tz=pytz.utc)
 
 def get_xml(url, capture_error=None):
-    xml = XML(urlopen(url).read())
+    xml = ET.fromstring(urlopen(url).read())
     if capture_error:
         capture = capture_error(xml)
         if capture: raise Error(capture)
@@ -63,7 +64,7 @@ def get_xml(url, capture_error=None):
 
 def get_xml_children(url, capture_error=None, filter=None):
     xml = get_xml(url, capture_error)
-    return [i for i in xml.getchildren() if not filter or filter(i)]
+    return [i for i in xml if not filter or filter(i)]
 
 def ttc_routes_maintain():
     with transaction.atomic():
@@ -90,7 +91,7 @@ def ttc_routes_maintain():
                 'lat_max': route_config.attrib['latMax'],
                 'lon_max': route_config.attrib['lonMax'],
             })
-            for i in route_config.getchildren():
+            for i in route_config:
                 if i.tag != 'stop': continue
                 stop = stops.upsert(i.attrib['tag'], {
                     'route_id': lambda: route.id,
