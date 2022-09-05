@@ -12,7 +12,7 @@ def ttc_vehicles_get(request):
     request_lon = float(request.GET['lon'])
     try: vehicles = helpers.get_xml_children(
         helpers.url_nextbus_vehicle_locations,
-        lambda xml: [i for i in xml.getchildren() if i.tag == 'Error'],
+        lambda xml: [i for i in xml if i.tag == 'Error'],
         lambda i: i.tag == 'vehicle',
     )
     except helpers.Error as e:
@@ -47,8 +47,8 @@ def ttc_routes(request):
 def ttc_routes_get(request):
     tag = request.GET['tag']
     route = helpers.get_xml_children(helpers.url_nextbus_route_config.format(tag))[0]
-    stops = [i for i in route.getchildren() if i.tag == 'stop']
-    directions = [i for i in route.getchildren() if i.tag == 'direction']
+    stops = [i for i in route if i.tag == 'stop']
+    directions = [i for i in route if i.tag == 'direction']
     return JsonResponse({
         'latMin': route.attrib['latMin'],
         'latMax': route.attrib['latMax'],
@@ -61,7 +61,7 @@ def ttc_routes_get(request):
         } for i in stops},
         'directions': {i.attrib['tag']: {
             'title': i.attrib['title'],
-            'stops': [j.attrib['tag'] for j in i.getchildren()],
+            'stops': [j.attrib['tag'] for j in i],
         } for i in directions},
     })
 
