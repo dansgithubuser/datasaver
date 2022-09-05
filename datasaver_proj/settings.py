@@ -29,7 +29,7 @@ else:
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'https://datasaver.dansonlinepresence.com',
+    'datasaver.dansonlinepresence.com',
 ]
 
 

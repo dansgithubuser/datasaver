@@ -15,7 +15,7 @@ import sys
 parser = argparse.ArgumentParser()
 parser.add_argument('--docker-build', '--dkrb', action='store_true')
 parser.add_argument('--docker-create-env-file', '--dkre', action='store_true')
-parser.add_argument('--docker-run', '--dkrr', metavar='port')
+parser.add_argument('--docker-run', '--dkrr', action='store_true')
 args = parser.parse_args()
 
 #===== consts =====#
@@ -99,17 +99,21 @@ if args.docker_create_env_file:
         secrets.choice(string.ascii_letters + string.digits)
         for i in range(32)
     )
+    print('domain:')
+    domain = input()
     with open('env.txt', 'w') as f:
         f.write(f'DJANGO_SECRET_KEY={secret_key}\n')
+        f.write(f'DOMAIN={domain}\n')
 
 if args.docker_run:
-    port = args.docker_run
     invoke(
         'docker', 'run',
         '-d',
         '--env-file', 'env.txt',
+        '--volume', '/etc/letsencrypt/live:/etc/letsencrypt/live:ro',
+        '--volume', '/etc/letsencrypt/archive:/etc/letsencrypt/archive:ro',
         '--name', 'datasaver',
-        '-p', f'{port}:8000',
+        '-p', '8000:8000',
         '--restart', 'always',
         'datasaver:latest',
     )

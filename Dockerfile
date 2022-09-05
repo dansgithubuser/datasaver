@@ -19,4 +19,9 @@ RUN DJANGO_SECRET_KEY=x python3 manage.py collectstatic --no-input
 
 EXPOSE 8000
 
-ENTRYPOINT gunicorn -w 4 -b 0.0.0.0:8000 datasaver_proj.wsgi:application
+ENTRYPOINT gunicorn\
+	-w 4\
+	-b 0.0.0.0:8000\
+	--certfile=/etc/letsencrypt/live/$DOMAIN/fullchain.pem\
+	--keyfile=/etc/letsencrypt/live/$DOMAIN/privkey.pem\
+	datasaver_proj.wsgi:application
