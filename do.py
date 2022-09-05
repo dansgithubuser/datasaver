@@ -73,12 +73,25 @@ def invoke(
             if out != 'exact': result = result.strip()
         return result
 
+def git_state():
+    diff = invoke('git diff', out=True)
+    diff_cached = invoke('git diff --cached', out=True)
+    with open('git-state.txt', 'w') as git_state:
+        git_state.write(invoke('git show --name-only', out=True)+'\n')
+        if diff:
+            git_state.write('\n===== diff =====\n')
+            git_state.write(diff+'\n')
+        if diff_cached:
+            git_state.write('\n===== diff --cached =====\n')
+            git_state.write(diff_cached+'\n')
+
 #===== main =====#
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit()
 
 if args.docker_build:
+    git_state()
     invoke('docker build -t datasaver:latest .')
 
 if args.docker_create_env_file:
