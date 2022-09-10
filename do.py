@@ -114,6 +114,8 @@ if args.docker_run:
         '--volume', '/etc/letsencrypt/live:/etc/letsencrypt/live:ro',
         '--volume', '/etc/letsencrypt/archive:/etc/letsencrypt/archive:ro',
         '--name', 'datasaver',
+        '--log-opt', 'max-size=10m',
+        '--log-opt', 'max-file=3',
         '-p', '8000:8000',
         '--restart', 'always',
         'datasaver:latest',
