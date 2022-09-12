@@ -22,6 +22,4 @@ EXPOSE 8000
 ENTRYPOINT gunicorn\
 	-w 4\
 	-b 0.0.0.0:8000\
-	--certfile=/etc/letsencrypt/live/$DOMAIN/fullchain.pem\
-	--keyfile=/etc/letsencrypt/live/$DOMAIN/privkey.pem\
 	datasaver_proj.wsgi:application

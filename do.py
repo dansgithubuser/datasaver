@@ -99,11 +99,8 @@ if args.docker_create_env_file:
         secrets.choice(string.ascii_letters + string.digits)
         for i in range(32)
     )
-    print('domain:')
-    domain = input()
     with open('env.txt', 'w') as f:
         f.write(f'DJANGO_SECRET_KEY={secret_key}\n')
-        f.write(f'DOMAIN={domain}\n')
 
 if args.docker_run:
     invoke('docker rm -f datasaver')
@@ -111,8 +108,6 @@ if args.docker_run:
         'docker', 'run',
         '-d',
         '--env-file', 'env.txt',
-        '--volume', '/etc/letsencrypt/live:/etc/letsencrypt/live:ro',
-        '--volume', '/etc/letsencrypt/archive:/etc/letsencrypt/archive:ro',
         '--name', 'datasaver',
         '--log-opt', 'max-size=10m',
         '--log-opt', 'max-file=3',
