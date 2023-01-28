@@ -9,7 +9,8 @@
 	<input type='button' onclick='toUrl()' value='to URL'><br>
 	<br>
 	<input type='button' onclick='update()' value='update' id='update'><br><br>
-	<input type='button' onclick='deselect()' value='deselect'><br>
+	<input type='button' onclick='deselect()' value='deselect'>
+	<input type='button' onclick='clear_()' value='clear' style='float: right'><br>
 
 	<canvas id='canvas' width=720 height=720>
 		<p>Your browser does not support the canvas element.</p>
@@ -27,7 +28,7 @@ function last(array){ return array[array.length - 1]; }
 
 const PIXELS_PER_DEGREE = 2e4;
 
-const gVehicles = {};
+var gVehicles = {};
 var gSelected = [];
 var gLat, gLon;
 
@@ -137,6 +138,12 @@ function deselect() {
 	gSelected = [];
 	render();
 	listSelected();
+}
+
+function clear_() {
+	gVehicles = {};
+	gSelected = [];
+	render();
 }
 
 function handleTap(x, y) {
