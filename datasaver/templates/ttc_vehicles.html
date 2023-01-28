@@ -9,6 +9,10 @@
 	<input type='button' onclick='toUrl()' value='to URL'><br>
 	<br>
 	<input type='button' onclick='update()' value='update' id='update'><br><br>
+	<input type='button' onclick='move(-200, 0)' value='⬅️'>
+	<input type='button' onclick='move(0, -200)' value='⬇️'>
+	<input type='button' onclick='move(0, +200)' value='⬆️'>
+	<input type='button' onclick='move(+200, 0)' value='➡️'>
 	<input type='button' onclick='deselect()' value='deselect'>
 	<input type='button' onclick='clear_()' value='clear' style='float: right'><br>
 
@@ -132,6 +136,14 @@ function listSelected() {
 			}
 		}
 	}
+}
+
+function move(dx, dy) {
+	gLat += dy / M_PER_DEGREE;
+	gLon += dx / (M_PER_DEGREE * aspect(gLat));
+	e('lat').value = gLat;
+	e('lon').value = gLon;
+	render();
 }
 
 function deselect() {

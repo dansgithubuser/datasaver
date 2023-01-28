@@ -25,3 +25,5 @@ function getLatLon(x, y, latO, lonO, pixelsPerDegree, canvas) {
 		lon:  (x - canvas.width  / 2) / pixelsPerDegree / aspect(latO) + lonO,
 	};
 }
+
+const M_PER_DEGREE = 1e7 / 90;
