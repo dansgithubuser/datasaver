@@ -58,23 +58,36 @@ function render() {
 		const r = 255;
 		const g = 0;
 		const b = gSelected.includes(i) ? 255 : 0;
+		let s;
 		let v;
 		let first = true;
-		CONTEXT.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+		// draw path
+		CONTEXT.strokeStyle = `rgb(${r >> 1}, ${g >> 1}, ${b >> 1})`;
 		CONTEXT.beginPath();
 		for (const j of vehiclePath) {
-			v = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
+			s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
 			if (first) {
 				first = false;
-				CONTEXT.moveTo(v.x, v.y);
+				CONTEXT.moveTo(s.x, s.y);
 			} else {
-				CONTEXT.lineTo(v.x, v.y);
+				CONTEXT.lineTo(s.x, s.y);
+			}
+			v = {
+				x: -j.speed * Math.sin(j.heading / 180 * Math.PI),
+				y: +j.speed * Math.cos(j.heading / 180 * Math.PI),
 			}
 		}
 		CONTEXT.stroke();
-		drawIcon(v.x, v.y, r, g, b);
+		// draw velocity
+		CONTEXT.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+		CONTEXT.beginPath();
+		CONTEXT.moveTo(s.x, s.y);
+		CONTEXT.lineTo(s.x + v.x, s.y + v.y);
+		CONTEXT.stroke()
+		// draw vehicle
+		drawIcon(s.x, s.y, r, g, b);
 		const vehicle = last(vehiclePath);
-		CONTEXT.fillText(vehicle.route, v.x + ICON_SIZE, v.y);
+		CONTEXT.fillText(vehicle.route, s.x + ICON_SIZE, s.y);
 	}
 }
 
