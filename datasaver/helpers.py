@@ -16,6 +16,9 @@ url_nextbus_vehicle_locations = url_nextbus + 'command=vehicleLocations&a=ttc&t=
 url_nextbus_route_list = url_nextbus + 'command=routeList&a=ttc'
 url_nextbus_route_config = url_nextbus + 'command=routeConfig&a=ttc&r={}&terse'
 
+class F:
+    xml_last_raw: None
+
 class Error(Exception):
     def __init__(self, capture):
         Exception.__init__(self)
@@ -56,7 +59,9 @@ class Bulker:
 def now_utc(): return datetime.datetime.now(tz=pytz.utc)
 
 def get_xml(url, capture_error=None):
-    xml = ET.fromstring(urlopen(url).read())
+    raw = urlopen(url).read()
+    F.xml_last_raw = raw
+    xml = ET.fromstring(raw)
     if capture_error:
         capture = capture_error(xml)
         if capture: raise Error(capture)

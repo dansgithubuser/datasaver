@@ -6,15 +6,18 @@ from django.shortcuts import render
 import urllib.request
 
 import math
+import logging
 
 def ttc_vehicles_get(request):
     request_lat = float(request.GET['lat'])
     request_lon = float(request.GET['lon'])
-    try: vehicles = helpers.get_xml_children(
-        helpers.url_nextbus_vehicle_locations,
-        lambda xml: [i for i in xml if i.tag == 'Error'],
-        lambda i: i.tag == 'vehicle',
-    )
+    url = helpers.url_nextbus_vehicle_locations
+    try:
+        vehicles = helpers.get_xml_children(
+            url,
+            lambda xml: [i for i in xml if i.tag == 'Error'],
+            lambda i: i.tag == 'vehicle',
+        )
     except helpers.Error as e:
         error = [i.text.strip() for i in e.capture]
         if len(error) == 1: error = error[0]
@@ -37,6 +40,8 @@ def ttc_vehicles_get(request):
             heading=float(vehicle['heading']),
             speed=speed,
         )
+    if result == {}:
+        logging.info(f'Got no vehicles from NextBus. URL: {url} raw:\n{helpers.F.xml_last_raw.decode()}. ')
     return JsonResponse(result)
 
 def ttc_routes(request):
