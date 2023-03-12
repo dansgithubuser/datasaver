@@ -1,4 +1,4 @@
-const ICON_SIZE = 4;
+const ICON_SIZE = 8;
 const CANVAS = e('canvas');
 const CONTEXT = CANVAS.getContext('2d');
 

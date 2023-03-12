@@ -60,14 +60,12 @@ function render() {
 	drawIcon(CANVAS.width / 2, CANVAS.height / 2, 0, 255);// self
 	for (const i in gVehicles) {
 		const vehiclePath = gVehicles[i];
-		const r = 255;
-		const g = 0;
-		const b = gSelected.includes(i) ? 255 : 0;
+		let pathBrightness = 128;
 		let s;
 		let v;
+		let heading;
 		let first = true;
 		// draw path
-		CONTEXT.strokeStyle = `rgb(${r >> 1}, ${g >> 1}, ${b >> 1})`;
 		CONTEXT.beginPath();
 		for (const j of vehiclePath) {
 			s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
@@ -75,6 +73,7 @@ function render() {
 				first = false;
 				CONTEXT.moveTo(s.x, s.y);
 			} else {
+				CONTEXT.strokeStyle = `rgb(${pathBrightness}, ${pathBrightness}, ${pathBrightness})`;
 				CONTEXT.lineTo(s.x, s.y);
 			}
 			v = {
@@ -84,14 +83,21 @@ function render() {
 		}
 		CONTEXT.stroke();
 		// draw velocity
-		CONTEXT.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+		CONTEXT.strokeStyle = `rgb(255, 255, 0)`;
 		CONTEXT.beginPath();
 		CONTEXT.moveTo(s.x, s.y);
 		CONTEXT.lineTo(s.x + v.x, s.y + v.y);
 		CONTEXT.stroke()
 		// draw vehicle
-		drawIcon(s.x, s.y, r, g, b);
 		const vehicle = last(vehiclePath);
+		CONTEXT.fillStyle = `rgb(255, ${gSelected.includes(i) ? 0 : 255}, 255)`;
+		CONTEXT.beginPath();
+		CONTEXT.arc(
+			s.x, s.y, ICON_SIZE,
+			(vehicle.heading - 180) / 180 * Math.PI,
+			(vehicle.heading      ) / 180 * Math.PI,
+		)
+		CONTEXT.fill()
 		CONTEXT.fillText(vehicle.route, s.x + ICON_SIZE, s.y);
 	}
 }
@@ -165,7 +171,7 @@ function handleTap(x, y) {
 	for (const i in gVehicles) {
 		const vehicle = last(gVehicles[i]);
 		const v = getPixelCoords(vehicle.lat, vehicle.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
-		if (Math.abs(v.x - x) + Math.abs(v.y - y) < 10) {
+		if (Math.abs(v.x - x) + Math.abs(v.y - y) < 20) {
 			const index = gSelected.indexOf(i);
 			if (index < 0) gSelected.push(i);
 			else gSelected.splice(index, 1);
