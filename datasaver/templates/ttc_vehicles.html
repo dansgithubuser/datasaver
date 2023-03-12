@@ -1,28 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	track nearby TTC vehicles<br>
-	lat: <input type='text' id='lat' value=43.645262><br>
-	lon: <input type='text' id='lon' value=-79.382742><br>
-	unparsed: <input type='text' id='unparsed'><input type='button' onclick='parse()' value='parse'><br>
-	<input type='button' onclick='getLocation()' value='get location'><br>
-	<input type='button' onclick='toUrl()' value='to URL'><br>
-	<br>
-	<input type='button' onclick='update()' value='update' id='update'><br><br>
-	<input type='button' onclick='move(-200, 0)' value='⬅️'>
-	<input type='button' onclick='move(0, -200)' value='⬇️'>
-	<input type='button' onclick='move(0, +200)' value='⬆️'>
-	<input type='button' onclick='move(+200, 0)' value='➡️'>
-	<input type='button' onclick='deselect()' value='deselect'>
-	<input type='button' onclick='clear_()' value='clear' style='float: right'><br>
-
-	<canvas id='canvas' width=720 height=720>
-		<p>Your browser does not support the canvas element.</p>
-	</canvas><br>
-
+	<div style='display: flex; flex-direction: column; height: calc(100vh - 16px)'>
+		<div style='display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem'>
+			<input type='text' id='lat' value=43.645262 placeholder='lat'>
+			<input type='text' id='lon' value=-79.382742 placeholder='lon'>
+			<input type='button' onclick='getLocation()' value='get location'>
+			<div>
+				<input type='text' id='unparsed' placeholder='clipboard'>
+				<input type='button' onclick='parse()' value='parse'>
+			</div>
+			<input type='button' onclick='toUrl()' value='to URL'>
+		</div>
+		<div style='display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem'>
+			<input type='button' onclick='update()' value='update' id='update'>
+			<input type='button' onclick='move(-200, 0)' value='⬅️'>
+			<input type='button' onclick='move(0, -200)' value='⬇️'>
+			<input type='button' onclick='move(0, +200)' value='⬆️'>
+			<input type='button' onclick='move(+200, 0)' value='➡️'>
+			<input type='button' onclick='deselect()' value='deselect'>
+			<input type='button' onclick='clear_()' value='clear' style='margin-left: auto'>
+		</div>
+		<canvas id='canvas' style='flex-grow: 1'>
+			<p>Your browser does not support the canvas element.</p>
+		</canvas>
+	</div>
 	<div id='selected'></div>
 	<p id='message'/>
-
 	<script>
 
 {% include 'boilerplate_canvas.js' %}
@@ -56,6 +60,8 @@ function getLocation() {
 }
 
 function render() {
+	CANVAS.width = CANVAS.clientWidth;
+	CANVAS.height = CANVAS.clientHeight;
 	drawRect(0, 0, CANVAS.width, CANVAS.height, 0, 0, 0);// background
 	drawIcon(CANVAS.width / 2, CANVAS.height / 2, 0, 255);// self
 	for (const i in gVehicles) {
