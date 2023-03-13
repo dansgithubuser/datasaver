@@ -64,47 +64,57 @@ function render() {
 	CANVAS.height = CANVAS.clientHeight;
 	drawRect(0, 0, CANVAS.width, CANVAS.height, 0, 0, 0);// background
 	drawIcon(CANVAS.width / 2, CANVAS.height / 2, 0, 255);// self
+	// draw paths
+	const now = new Date();
 	for (const i in gVehicles) {
-		const vehiclePath = gVehicles[i];
-		let pathBrightness = 128;
-		let s;
-		let v;
-		let heading;
-		let first = true;
-		// draw path
-		CONTEXT.beginPath();
-		for (const j of vehiclePath) {
-			s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
-			if (first) {
-				first = false;
-				CONTEXT.moveTo(s.x, s.y);
-			} else {
-				CONTEXT.strokeStyle = `rgb(${pathBrightness}, ${pathBrightness}, ${pathBrightness})`;
+		let sPrev;
+		for (const j of gVehicles[i]) {
+			const s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
+			if (sPrev) {
+				const age = (now - j.timestamp) / 1000;
+				const brightness = Math.floor(255 * Math.max(0.995 ** age, 0.25));
+				CONTEXT.beginPath();
+				CONTEXT.strokeStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
+				CONTEXT.moveTo(sPrev.x, sPrev.y);
 				CONTEXT.lineTo(s.x, s.y);
+				CONTEXT.stroke();
 			}
-			v = {
-				x: -j.speed * Math.sin(j.heading / 180 * Math.PI),
-				y: +j.speed * Math.cos(j.heading / 180 * Math.PI),
-			}
+			sPrev = s;
 		}
-		CONTEXT.stroke();
-		// draw velocity
-		CONTEXT.strokeStyle = `rgb(255, 255, 0)`;
-		CONTEXT.beginPath();
+	}
+	// draw velocities
+	CONTEXT.beginPath();
+	CONTEXT.strokeStyle = `rgb(255, 255, 0)`;
+	for (const i in gVehicles) {
+		const j = last(gVehicles[i]);
+		const s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
+		const v = {
+			x: -j.speed * Math.sin(j.heading / 180 * Math.PI),
+			y: +j.speed * Math.cos(j.heading / 180 * Math.PI),
+		}
 		CONTEXT.moveTo(s.x, s.y);
 		CONTEXT.lineTo(s.x + v.x, s.y + v.y);
-		CONTEXT.stroke()
-		// draw vehicle
-		const vehicle = last(vehiclePath);
-		CONTEXT.fillStyle = `rgb(255, ${gSelected.includes(i) ? 0 : 255}, 255)`;
+	}
+	CONTEXT.stroke()
+	// draw heading
+	for (const i in gVehicles) {
+		const j = last(gVehicles[i]);
+		const s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
 		CONTEXT.beginPath();
+		CONTEXT.fillStyle = gSelected.includes(i) ? '#FF00FF' : '#FFFFFF';
 		CONTEXT.arc(
 			s.x, s.y, ICON_SIZE,
-			(vehicle.heading - 180) / 180 * Math.PI,
-			(vehicle.heading      ) / 180 * Math.PI,
+			(j.heading - 180) / 180 * Math.PI,
+			(j.heading      ) / 180 * Math.PI,
 		)
 		CONTEXT.fill()
-		CONTEXT.fillText(vehicle.route, s.x + ICON_SIZE, s.y);
+	}
+	// draw label
+	for (const i in gVehicles) {
+		const j = last(gVehicles[i]);
+		const s = getPixelCoords(j.lat, j.lon, gLat, gLon, PIXELS_PER_DEGREE, CANVAS);
+		CONTEXT.fillStyle = gSelected.includes(i) ? '#FF00FF' : '#00FFFF';
+		CONTEXT.fillText(j.route, s.x + ICON_SIZE, s.y);
 	}
 }
 
@@ -125,6 +135,7 @@ async function update() {
 		const vehicles = await response.json();
 		for (const i in vehicles) {
 			if (!(i in gVehicles)) gVehicles[i] = [];
+			vehicles[i].timestamp = new Date();
 			gVehicles[i].push(vehicles[i]);
 		}
 		render();
