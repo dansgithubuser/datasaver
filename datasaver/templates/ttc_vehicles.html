@@ -181,7 +181,10 @@ function clear_() {
 	render();
 }
 
+let fTapStartedAt;
+
 function handleTap(x, y) {
+	fTapStartedAt = new Date();
 	const rect = CANVAS.getBoundingClientRect();
 	x -= rect.left;
 	y -= rect.top;
@@ -198,13 +201,28 @@ function handleTap(x, y) {
 	render();
 }
 
+function handleTapEnd() {
+	if (new Date() - fTapStartedAt > 1000) {
+		update();
+	}
+}
+
 CANVAS.addEventListener('mousedown', function(e) {
 	handleTap(e.x, e.y);
+});
+CANVAS.addEventListener('mouseup', function(e) {
+	handleTapEnd();
 });
 CANVAS.addEventListener('touchstart', function(e) {
 	for (const i of e.changedTouches)
 		handleTap(i.x, i.y);
 }, {passive: true});
+CANVAS.addEventListener('touchend', function(e) {
+	handleTapEnd();
+});
+CANVAS.addEventListener('touchcancel', function(e) {
+	handleTapEnd();
+});
 
 params = new URLSearchParams(window.location.search);
 if (params.has('lat')) e('lat').value = params.get('lat');
